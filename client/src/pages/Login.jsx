@@ -3,10 +3,13 @@ import { useForm } from 'react-hook-form'
 import api from '../api/axios'
 import socket, { connect } from '../api/socket'
 import { useNavigate } from 'react-router-dom'
+import { useContext } from 'react'
+import { AuthContext } from '../context/AuthContext'
 
 export default function Login(){
   const { register, handleSubmit } = useForm();
   const nav = useNavigate();
+  const { setUser } = useContext(AuthContext);
   const onSubmit = async (data) => {
     const payload = { email: (data.email || '').trim(), password: (data.password || '').trim() };
     if (!payload.email || !payload.password) { alert('Email and password are required'); return; }
@@ -15,6 +18,7 @@ export default function Login(){
       localStorage.setItem('token', res.data.token);
       if (res.data.refreshToken) localStorage.setItem('refreshToken', res.data.refreshToken);
       localStorage.setItem('user', JSON.stringify(res.data.user));
+      setUser(res.data.user);
       // connect socket (auth sent via handshake)
       try { connect(); } catch (e) { console.warn('socket connect failed', e); }
       nav('/dashboard');
